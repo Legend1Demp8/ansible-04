@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for vector-role
+vector_download_protocol: "https"
+vector_download_domain: "github.com"
+vector_repo_owner: "vectordotdev"
+vector_repo_name: "vector"
+vector_release_type: "releases/download"
+vector_archive_url: "{{ vector_download_protocol }}://{{ vector_download_domain }}/{{ vector_repo_owner }}/{{ vector_repo_name }}/{{ vector_release_type }}/v{{ vector_version }}/vector-{{ vector_version }}-{{ vector_arch }}.tar.gz"

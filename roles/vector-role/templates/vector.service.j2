@@ -1,0 +1,18 @@
+[Unit]
+Description=Vector CLI log aggregator
+Documentation=https://vector.dev
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vector
+Group=vector
+ExecStart={{ vector_install_dir }}/bin/vector --config {{ vector_config_file }}
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+StateDirectory=vector
+
+[Install]
+WantedBy=multi-user.target

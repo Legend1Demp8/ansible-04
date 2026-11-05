@@ -1,0 +1,78 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for lighthouse-role
+- name: Install Nginx and Git
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - git
+    state: present
+    update_cache: true
+  tags: nginx
+
+- name: Check if LightHouse is already cloned
+  ansible.builtin.stat:
+    path: "{{ lighthouse_dir }}/.git"
+  register: lighthouse_git
+  tags: lighthouse
+
+- name: Clone LightHouse repository
+  ansible.builtin.git:
+    repo: "{{ lighthouse_vcs_url }}"
+    dest: "{{ lighthouse_dir }}"
+    version: "{{ lighthouse_vcs_version }}"
+    force: true
+  when: not lighthouse_git.stat.exists
+  tags: lighthouse
+
+- name: Update LightHouse repository (only if lighthouse_force_update=true)
+  ansible.builtin.git:
+    repo: "{{ lighthouse_vcs_url }}"
+    dest: "{{ lighthouse_dir }}"
+    version: "{{ lighthouse_vcs_version }}"
+    force: true
+    update: true
+  when:
+    - lighthouse_git.stat.exists
+    - lighthouse_force_update | bool
+  tags: lighthouse
+
+- name: Set ownership of lighthouse_dir to www-data
+  ansible.builtin.file:
+    path: "{{ lighthouse_dir }}"
+    state: directory
+    recurse: true
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  tags: lighthouse
+
+- name: Configure Nginx site for LightHouse
+  ansible.builtin.template:
+    src: "lighthouse.conf.j2"
+    dest: "/etc/nginx/sites-available/lighthouse"
+    mode: '0644'
+  notify: Restart Nginx
+  tags: nginx
+
+- name: Enable LightHouse Nginx site
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/lighthouse"
+    dest: "/etc/nginx/sites-enabled/lighthouse"
+    state: link
+  notify: Restart Nginx
+  tags: nginx
+
+- name: Remove default Nginx site configuration
+  ansible.builtin.file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: Restart Nginx
+  tags: nginx
+
+- name: Ensure Nginx service is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  tags: nginx

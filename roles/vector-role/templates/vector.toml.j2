@@ -1,0 +1,9 @@
+data_dir = "{{ vector_data_dir }}"
+
+[sources.syslog]
+type = "journald"    
+
+[sinks.stdout]
+type = "console"
+inputs = ["syslog"]
+encoding.codec = "json"

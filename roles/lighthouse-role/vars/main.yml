@@ -1,0 +1,5 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for lighthouse-role
+lighthouse_vcs_url: "https://github.com/VKCOM/lighthouse.git"
+lighthouse_vcs_version: "master"
